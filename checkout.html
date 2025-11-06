@@ -157,5 +157,179 @@
 
     tampilkanPesanan();
   </script>
+  <script>
+document.addEventListener("DOMContentLoaded", function() {
+    const pesanan = JSON.parse(localStorage.getItem("pesanan")) || [];
+    const tbody = document.querySelector("table tbody");
+    const totalTag = document.querySelector("p span");
+
+    if (pesanan.length === 0) {
+        console.log("Belum ada pesanan");
+        return;
+    }
+
+    let total = 0;
+    pesanan.forEach((item, index) => {
+        const subtotal = item.harga * item.jumlah;
+        total += subtotal;
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${item.judul}</td>
+            <td>${item.jumlah}</td>
+            <td>Rp ${item.harga.toLocaleString()}</td>
+            <td>Rp ${subtotal.toLocaleString()}</td>
+            <td><button onclick="hapusPesanan(${index})">Hapus</button></td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    totalTag.textContent = "Rp " + total.toLocaleString();
+});
+
+function hapusPesanan(index) {
+    let pesanan = JSON.parse(localStorage.getItem("pesanan")) || [];
+    pesanan.splice(index, 1);
+    localStorage.setItem("pesanan", JSON.stringify(pesanan));
+    location.reload(); // Refresh agar tabel diperbarui
+}
+</script>
+<script>
+/* === Checkout: render pesanan, hitung subtotal & total, hapus item, ubah qty === */
+
+function formatRp(n){
+  return "Rp " + Number(n).toLocaleString("id-ID");
+}
+
+// Ambil data pesanan dari localStorage (array objek)
+function getPesanan(){
+  try {
+    return JSON.parse(localStorage.getItem("pesanan")) || [];
+  } catch(e){
+    return [];
+  }
+}
+
+// Simpan pesanan kembali
+function savePesanan(arr){
+  localStorage.setItem("pesanan", JSON.stringify(arr));
+}
+
+// Render tabel checkout
+function renderCheckout(){
+  const body = document.getElementById("cart-body");
+  const totalEl = document.getElementById("total");
+  if(!body || !totalEl) return;
+
+  const pesanan = getPesanan();
+  body.innerHTML = "";
+
+  let total = 0;
+
+  pesanan.forEach((item, idx) => {
+    // Pastikan harga di item.harga berbentuk angka (toleransi format "Rp 95.000" atau "95000")
+    let hargaNum = 0;
+    if (typeof item.harga === "number") hargaNum = item.harga;
+    else if (typeof item.harga === "string") hargaNum = parseInt(item.harga.replace(/[^\d]/g,'')) || 0;
+
+    let jumlah = Number(item.jumlah) || 1;
+    let subtotal = hargaNum * jumlah;
+    total += subtotal;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${item.judul}</td>
+      <td style="text-align:center">
+        <input type="number" min="1" value="${jumlah}" data-idx="${idx}" class="qty-input" style="width:60px"/>
+      </td>
+      <td style="text-align:right">${formatRp(hargaNum)}</td>
+      <td style="text-align:right" class="subtotal-cell"> ${formatRp(subtotal)} </td>
+      <td style="text-align:center">
+        <button class="hapus-item" data-idx="${idx}">Hapus</button>
+      </td>
+    `;
+    body.appendChild(tr);
+  });
+
+  totalEl.textContent = formatRp(total);
+
+  // pasang event listener setelah rendering
+  attachQtyListeners();
+  attachDeleteListeners();
+}
+
+// ubah jumlah (qty) ketika user edit input jumlah
+function attachQtyListeners(){
+  document.querySelectorAll(".qty-input").forEach(input => {
+    input.addEventListener("change", function(){
+      let idx = Number(this.dataset.idx);
+      let val = Number(this.value);
+      if (isNaN(val) || val < 1) { this.value = 1; val = 1; }
+      const pesanan = getPesanan();
+      if (pesanan[idx]){
+        pesanan[idx].jumlah = val;
+        savePesanan(pesanan);
+        renderCheckout(); // re-render agar subtotal & total update
+      }
+    });
+  });
+}
+
+// hapus item dari pesanan
+function attachDeleteListeners(){
+  document.querySelectorAll(".hapus-item").forEach(btn => {
+    btn.addEventListener("click", function(){
+      const idx = Number(this.dataset.idx);
+      let pesanan = getPesanan();
+      pesanan.splice(idx, 1);
+      savePesanan(pesanan);
+      renderCheckout();
+    });
+  });
+}
+
+// jalankan saat halaman siap
+document.addEventListener("DOMContentLoaded", function(){
+  renderCheckout();
+});
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const pesanan = JSON.parse(localStorage.getItem("pesanan")) || [];
+    const tbody = document.querySelector("tbody");
+    let total = 0;
+
+    tbody.innerHTML = "";
+    pesanan.forEach((item, index) => {
+      const subtotal = item.harga * item.jumlah;
+      total += subtotal;
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${item.judul}</td>
+        <td>${item.jumlah}</td>
+        <td>Rp ${item.harga.toLocaleString("id-ID")}</td>
+        <td>Rp ${subtotal.toLocaleString("id-ID")}</td>
+        <td><button class="hapus" data-index="${index}">Hapus</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // tampilkan total keseluruhan
+    document.querySelector("h2 + table + .total span, #total").textContent = 
+      "Rp " + total.toLocaleString("id-ID");
+
+    // tombol hapus
+    document.querySelectorAll(".hapus").forEach(btn => {
+      btn.addEventListener("click", function() {
+        const idx = this.dataset.index;
+        pesanan.splice(idx, 1);
+        localStorage.setItem("pesanan", JSON.stringify(pesanan));
+        location.reload();
+      });
+    });
+  });
+</script>
+
 </body>
 </html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Toko Buku Online</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f4ff;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Navbar */
+    .navbar {
+      background-color: #0056d2;
+      color: white;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      margin-left: 20px;
+      font-weight: bold;
+    }
+
+    .navbar a:hover {
+      text-decoration: underline;
+    }
+
+    .content {
+      text-align: center;
+      margin: 120px 40px 40px;
+    }
+
+    h2 {
+      color: #0047b3;
+    }
+
+    .card-container {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 200px;
+      padding: 20px;
+    }
+
+    .card h3 {
+      color: #0047b3;
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      font-size: 22px;
+      font-weight: bold;
+      color: #000;
+    }
+
+    table {
+      width: 90%;
+      margin: 0 auto;
+      border-collapse: collapse;
+      background-color: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #0056d2;
+      color: white;
+    }
+
+    td img {
+      width: 60px;
+      height: auto;
+      border-radius: 6px;
+    }
+
+    .btn {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <div class="navbar">
+    <div><strong>Toko Buku Online</strong></div>
+    <div>
+      <a href="dashboard.html">Beranda</a>
+      <a href="katalog.html">Katalog</a>
+      <a href="checkout.html">Checkout</a>
+      <a href="tracking.html">Tracking</a>
+      <a href="login.html" style="background:red; padding:6px 12px; border-radius:5px;">Logout</a>
+    </div>
+  </div>
+
+  <!-- Konten -->
+  <div class="content">
+    <h2 id="welcomeText">Selamat Datang!</h2>
+    <p>Berikut ringkasan data toko buku Anda.</p>
+
+    <div class="card-container">
+      <div class="card">
+        <h3>Total Buku</h3>
+        <p>120</p>
+      </div>
+      <div class="card">
+        <h3>Penjualan Hari Ini</h3>
+        <p>35</p>
+      </div>
+      <div class="card">
+        <h3>Stok Habis</h3>
+        <p>8</p>
+      </div>
+      <div class="card">
+        <h3>Pesanan Baru</h3>
+        <p>5</p>
+      </div>
+    </div>
+
+    <h2>Daftar Buku</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Gambar</th>
+          <th>Judul Buku</th>
+          <th>Penulis</th>
+          <th>Stok</th>
+          <th>Harga</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><img src="kepemimpinan.jpg" alt="Kepemimpinan"></td>
+          <td>Kepemimpinan</td>
+          <td>Hj. Mu’ah, Tri Ifa Indrayani, H. Masram, Muhammad Sulton</td>
+          <td>12</td>
+          <td>Rp 95.000</td>
+          <td><button class="btn">Tambah ke Pesanan</button></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><img src="manajemen_keuangan.jpg" alt="Manajemen Keuangan"></td>
+          <td>Manajemen Keuangan</td>
+          <td>Erna Chotidjah Suhatmi</td>
+          <td>10</td>
+          <td>Rp 120.000</td>
+          <td><button class="btn">Tambah ke Pesanan</button></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><img src="mikrobiologi.jpg" alt="Mikrobiologi Dasar"></td>
+          <td>Mikrobiologi Dasar</td>
+          <td>Imam Mishbach, Ervina Indrayani dkk.</td>
+          <td>9</td>
+          <td>Rp 110.000</td>
+          <td><button class="btn">Tambah ke Pesanan</button></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><img src="paud_perkembangan.jpg" alt="Perkembangan Anak Usia Dini"></td>
+          <td>Perkembangan Anak Usia Dini</td>
+          <td>Drs. Ahmad Susanto, M.Pd.</td>
+          <td>15</td>
+          <td>Rp 85.000</td>
+          <td><button class="btn">Tambah ke Pesanan</button></td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td><img src="pengantar_komunikasi.jpg" alt="Ilmu Komunikasi"></td>
+          <td>Ilmu Komunikasi: Ilmiah dan Populer</td>
+          <td>Nurudin</td>
+          <td>14</td>
+          <td>Rp 100.000</td>
+          <td><button class="btn">Tambah ke Pesanan</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // Ambil data login dari localStorage
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+    if (currentUser) {
+      let role = currentUser.email === "siti@gmail.com" ? "(Admin)" : "(User)";
+      document.getElementById("welcomeText").textContent = 
+        `Selamat Datang, ${currentUser.name} ${role}!`;
+    } else {
+      document.getElementById("welcomeText").textContent = "Selamat Datang, Pengunjung!";
+    }
+  </script>
+</body>
+</html>

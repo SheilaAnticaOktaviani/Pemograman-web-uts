@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tracking Pengiriman Buku</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef3f7;
+      margin: 0;
+    }
+    header {
+      background-color: #0056b3;
+      color: white;
+      padding: 15px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    nav {
+      background-color: #0056b3;
+      padding: 10px;
+      text-align: right;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 15px;
+      font-weight: bold;
+    }
+    .container {
+      width: 60%;
+      margin: 40px auto;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 20px 30px;
+    }
+    h2 {
+      text-align: center;
+      color: #0056b3;
+      margin-bottom: 20px;
+    }
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    label {
+      font-weight: bold;
+      color: #0056b3;
+      display: block;
+      margin-top: 10px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-top: 5px;
+    }
+    input[readonly], textarea[readonly] {
+      background: #f9f9f9;
+    }
+    button {
+      background-color: #007bff;
+      border: none;
+      color: white;
+      font-weight: bold;
+      padding: 9px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+    .notfound {
+      color: red;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>Tracking Pengiriman Buku</header>
+  <nav>
+    <a href="dashboard.html">Dashboard</a> |
+    <a href="katalog.html">Katalog</a> |
+    <a href="checkout.html">Checkout</a>
+  </nav>
+
+  <div class="container">
+    <h2>Cari Nomor Delivery Order</h2>
+
+    <label>Masukkan Nomor DO:</label>
+    <div class="input-group">
+      <input type="text" id="inputDO" placeholder="Masukkan Nomor DO... (contoh: 49394)" />
+      <button id="btnCari">Cari</button>
+    </div>
+
+    <div id="hasil" style="display:none;">
+      <h3>Detail Pesanan</h3>
+
+      <label>Nama Pemesan:</label>
+      <input type="text" id="nama" readonly />
+
+      <label>Alamat Lengkap:</label>
+      <textarea id="alamat" rows="2" readonly></textarea>
+
+      <label>Metode Pembayaran:</label>
+      <input type="text" id="pembayaran" readonly />
+
+      <label>Ekspedisi:</label>
+      <input type="text" id="ekspedisi" readonly />
+
+      <label>Status:</label>
+      <input type="text" id="status" readonly />
+
+      <h3>📦 Daftar Barang</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama Barang</th>
+            <th>Jumlah</th>
+            <th>Harga</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody id="tabelBarang"></tbody>
+      </table>
+    </div>
+
+    <p id="pesanError" class="notfound"></p>
+  </div>
+
+  <script>
+    const inputDO = document.getElementById("inputDO");
+    const btnCari = document.getElementById("btnCari");
+    const hasil = document.getElementById("hasil");
+    const pesanError = document.getElementById("pesanError");
+    const tabelBarang = document.getElementById("tabelBarang");
+
+    const nama = document.getElementById("nama");
+    const alamat = document.getElementById("alamat");
+    const pembayaran = document.getElementById("pembayaran");
+    const ekspedisi = document.getElementById("ekspedisi");
+    const status = document.getElementById("status");
+
+    function ambilDataCheckout() {
+      try {
+        const data = JSON.parse(localStorage.getItem("checkoutData")) || [];
+        return Array.isArray(data) ? data : [data];
+      } catch {
+        return [];
+      }
+    }
+
+    function tampilkanData(data) {
+      hasil.style.display = "block";
+      pesanError.textContent = "";
+
+      nama.value = data.nama || "";
+      alamat.value = data.alamat || "";
+      pembayaran.value = data.pembayaran || "";
+      ekspedisi.value = data.ekspedisi || "";
+      status.value = data.status || "Sedang diproses";
+
+      tabelBarang.innerHTML = "";
+      if (Array.isArray(data.daftarBuku)) {
+        data.daftarBuku.forEach((buku, i) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${i + 1}</td>
+            <td>${buku.judul}</td>
+            <td>${buku.jumlah}</td>
+            <td>${buku.harga}</td>
+            <td>${buku.subtotal}</td>
+          `;
+          tabelBarang.appendChild(row);
+        });
+      }
+    }
+
+    function cariData() {
+      const noDO = inputDO.value.trim();
+      if (!noDO) {
+        hasil.style.display = "none";
+        pesanError.textContent = "";
+        return;
+      }
+
+      const semuaData = ambilDataCheckout();
+      const ditemukan = semuaData.find(item => item.noDO && item.noDO.toString() === noDO);
+
+      if (ditemukan) {
+        tampilkanData(ditemukan);
+      } else {
+        hasil.style.display = "none";
+        pesanError.textContent = "Nomor DO tidak ditemukan di data checkout!";
+      }
+    }
+
+    // Event: tombol "Cari" ditekan
+    btnCari.addEventListener("click", cariData);
+
+    // Event: tekan Enter di input
+    inputDO.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") cariData();
+    });
+  </script>
+</body>
+</html>
