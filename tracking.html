@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tracking Pengiriman Buku</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background-color: #f5f7fa; margin: 0; padding: 0; }
+    header { background-color: #1a73e8; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; font-size: 20px; font-weight: bold; }
+    header a { color: white; text-decoration: none; margin-left: 20px; }
+    main { background: white; max-width: 900px; margin: 40px auto; border-radius: 12px; padding: 30px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: center; }
+    h2 { color: #1a73e8; }
+    input { width: 60%; padding: 10px; font-size: 16px; border-radius: 6px; border: 1px solid #ccc; margin-top: 10px; }
+    button { background-color: #1a73e8; color: white; border: none; padding: 10px 20px; border-radius: 6px; margin-left: 10px; cursor: pointer; }
+    button:hover { background-color: #0b5ed7; }
+    .result { margin-top: 30px; text-align: left; display: none; }
+    .error { color: red; font-weight: bold; margin-top: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+    th { background-color: #1a73e8; color: white; }
+    .status { font-weight: bold; padding: 5px 10px; border-radius: 6px; display: inline-block; margin-top: 8px; }
+    .diproses { background-color: #ffcc00; color: #000; }
+    .dikirim { background-color: #1a73e8; color: #fff; }
+    .selesai { background-color: #28a745; color: #fff; }
+  </style>
+</head>
+<body>
+  <header>
+    📦 Tracking Pengiriman Buku
+    <nav>
+      <a href="dashboard.html">Dashboard</a> |
+      <a href="katalog.html">Katalog</a> |
+      <a href="checkout.html">Checkout</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Cari Nomor Delivery Order</h2>
+    <input type="text" id="noDO" placeholder="Masukkan Nomor DO">
+    <button onclick="cariDO()">Cari</button>
+
+    <p id="pesanError" class="error"></p>
+
+    <div id="hasil" class="result">
+      <h3>📘 Detail Pesanan</h3>
+      <p><b>No DO:</b> <span id="hasilNoDO"></span></p>
+      <p><b>Nama:</b> <span id="hasilNama"></span></p>
+      <p><b>Alamat:</b> <span id="hasilAlamat"></span></p>
+      <p><b>Pembayaran:</b> <span id="hasilPembayaran"></span></p>
+      <p><b>Ekspedisi:</b> <span id="hasilEkspedisi"></span></p>
+      <p><b>Status:</b> <span id="hasilStatus" class="status diproses"></span></p>
+
+      <h3>📚 Daftar Buku</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Judul Buku</th>
+            <th>Jumlah</th>
+            <th>Harga Satuan</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody id="tabelBuku"></tbody>
+      </table>
+      <p style="text-align:right; font-weight:bold; color:#1a73e8;">Total: <span id="totalHarga">Rp 0</span></p>
+    </div>
+  </main>
+
+  <script>
+    function cariDO() {
+      const inputDO = document.getElementById("noDO").value.trim();
+      const dataCheckout = JSON.parse(localStorage.getItem("dataCheckout"));
+      const pesanError = document.getElementById("pesanError");
+      const hasilDiv = document.getElementById("hasil");
+
+      if (!dataCheckout) {
+        pesanError.textContent = "❌ Belum ada data pesanan yang tersimpan.";
+        hasilDiv.style.display = "none";
+        return;
+      }
+
+      if (dataCheckout.noDO.replace("DO-", "") !== inputDO && dataCheckout.noDO !== inputDO) {
+        pesanError.textContent = "❌ Data tidak ditemukan. Periksa kembali nomor DO Anda.";
+        hasilDiv.style.display = "none";
+        return;
+      }
+
+      pesanError.textContent = "";
+      hasilDiv.style.display = "block";
+
+      document.getElementById("hasilNoDO").textContent = dataCheckout.noDO;
+      document.getElementById("hasilNama").textContent = dataCheckout.nama;
+      document.getElementById("hasilAlamat").textContent = dataCheckout.alamat;
+      document.getElementById("hasilPembayaran").textContent = dataCheckout.pembayaran;
+      document.getElementById("hasilEkspedisi").textContent = dataCheckout.ekspedisi;
+
+      // Status otomatis
+      const statusText = document.getElementById("hasilStatus");
+      const statusOtomatis = ["Diproses", "Dikirim", "Selesai"];
+      const random = Math.floor(Math.random() * statusOtomatis.length);
+      const status = statusOtomatis[random];
+      statusText.textContent = status;
+      statusText.className = "status " + (status === "Diproses" ? "diproses" : status === "Dikirim" ? "dikirim" : "selesai");
+
+      // Daftar buku
+      const tbody = document.getElementById("tabelBuku");
+      tbody.innerHTML = "";
+      let total = 0;
+      dataCheckout.pesanan.forEach(item => {
+        const subtotal = item.harga * item.jumlah;
+        total += subtotal;
+        const row = `
+          <tr>
+            <td>${item.nama}</td>
+            <td>${item.jumlah}</td>
+            <td>Rp ${item.harga.toLocaleString()}</td>
+            <td>Rp ${subtotal.toLocaleString()}</td>
+          </tr>`;
+        tbody.insertAdjacentHTML("beforeend", row);
+      });
+
+      document.getElementById("totalHarga").textContent = "Rp " + total.toLocaleString();
+    }
+  </script>
+</body>
+</html>

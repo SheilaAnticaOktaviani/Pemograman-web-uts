@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Stok/Katalog - Toko Buku</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="page">
+  <header class="site-header">
+    <h1>Katalog Buku</h1>
+    <nav><a href="dashboard.html">Dashboard</a> | <a href="checkout.html">Checkout</a></nav>
+  </header>
+  <main class="container">
+    <section class="card">
+      <h2>Daftar Buku</h2>
+      <table id="catalogTable" class="table">
+        <thead><tr><th>#</th><th>Judul</th><th>Penulis</th><th>Stok</th><th>Harga</th><th>Aksi</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <h3>Tambahkan Stok Baru</h3>
+      <form id="addStockForm">
+        <label>Judul<input id="judul" required></label>
+        <label>Penulis<input id="penulis" required></label>
+        <label>Stok<input id="stok" type="number" min="0" value="1" required></label>
+        <label>Harga<input id="harga" type="number" min="0" value="0" required></label>
+        <div class="actions"><button type="submit">Tambah</button></div>
+      </form>
+    </section>
+  </main>
+  <script src="js/data.js"></script>
+  <script>
+    const tbody = document.querySelector('#catalogTable tbody');
+    function renderCatalog(){
+      tbody.innerHTML='';
+      (window.dataKatalogBuku || []).forEach((b,i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${i+1}</td>
+          <td>${b.judul}</td>
+          <td>${b.penulis}</td>
+          <td>${b.stok}</td>
+          <td>Rp ${Number(b.harga).toLocaleString('id-ID')}</td>
+          <td><button data-i="${i}" class="addToCart">Pilih</button></td>`;
+        tbody.appendChild(tr);
+      });
+      document.querySelectorAll('.addToCart').forEach(btn=> btn.addEventListener('click', (e)=>{
+        const i = e.target.dataset.i;
+        const book = window.dataKatalogBuku[i];
+        // create a simple order in localStorage
+        const order = { id: Date.now(), bookTitle: book.judul, qty:1, price:book.harga };
+        const orders = JSON.parse(localStorage.getItem('orders')||'[]');
+        orders.push(order);
+        localStorage.setItem('orders', JSON.stringify(orders));
+        alert('Buku ditambahkan ke pesanan sementara.');
+      }));
+    }
+    renderCatalog();
+    document.getElementById('addStockForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const newBook = {
+        judul: document.getElementById('judul').value.trim(),
+        penulis: document.getElementById('penulis').value.trim(),
+        stok: Number(document.getElementById('stok').value),
+        harga: Number(document.getElementById('harga').value)
+      };
+      window.dataKatalogBuku.push(newBook);
+      renderCatalog();
+      e.target.reset();
+    });
+  </script>
+</body>
+</html>

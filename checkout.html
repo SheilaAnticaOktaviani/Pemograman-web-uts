@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout Pemesanan Buku</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background-color: #f5f7fa; margin: 0; padding: 0; }
+    header { background-color: #1a73e8; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; font-size: 20px; font-weight: bold; }
+    header a { color: white; text-decoration: none; margin-left: 20px; }
+    main { background: white; max-width: 950px; margin: 40px auto; border-radius: 12px; padding: 30px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    h2 { color: #1a73e8; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+    th { background-color: #1a73e8; color: white; }
+    button { background-color: #1a73e8; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+    button:hover { background-color: #0b5ed7; }
+    .total { text-align: right; font-weight: bold; color: #1a73e8; margin-top: 20px; font-size: 18px; }
+
+    .form-section { margin-top: 40px; }
+    label { display: block; margin: 10px 0 5px; font-weight: 600; color: #1a73e8; }
+    input, select, textarea { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; }
+    textarea { resize: none; height: 80px; }
+    .btn-konfirmasi { margin-top: 20px; padding: 12px 20px; background-color: #1a73e8; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
+    .btn-konfirmasi:hover { background-color: #0b5ed7; }
+  </style>
+</head>
+<body>
+  <header>
+    📘 Checkout Pemesanan
+    <nav>
+      <a href="dashboard.html">Dashboard</a> |
+      <a href="katalog.html">Katalog</a> |
+      <a href="checkout.html">Pemesanan</a> |
+      <a href="tracking.html">Tracking</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Buku yang Dipesan</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Judul Buku</th>
+          <th>Jumlah</th>
+          <th>Harga Satuan</th>
+          <th>Subtotal</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="tabelPesanan"></tbody>
+    </table>
+    <div class="total">Total: <span id="totalHarga">Rp 0</span></div>
+
+    <!-- Form Pemesanan -->
+    <div class="form-section">
+      <h2>Data Pemesanan</h2>
+
+      <label for="nama">Nama Pemesan</label>
+      <input type="text" id="nama" placeholder="Masukkan nama lengkap Anda">
+
+      <label for="alamat">Alamat Lengkap</label>
+      <textarea id="alamat" placeholder="Masukkan alamat lengkap pengiriman"></textarea>
+
+      <label for="pembayaran">Metode Pembayaran</label>
+      <select id="pembayaran">
+        <option value="">-- Pilih Metode Pembayaran --</option>
+        <option value="COD">COD (Bayar di Tempat)</option>
+        <option value="Transfer">Transfer Bank</option>
+        <option value="E-Wallet">E-Wallet (Dana, OVO, Gopay)</option>
+      </select>
+
+      <label for="ekspedisi">Ekspedisi</label>
+      <select id="ekspedisi">
+        <option value="">-- Pilih Ekspedisi --</option>
+        <option value="JNE">JNE</option>
+        <option value="J&T">J&T Express</option>
+        <option value="SiCepat">SiCepat</option>
+        <option value="POS">POS Indonesia</option>
+      </select>
+
+      <button class="btn-konfirmasi" onclick="konfirmasiPesanan()">Konfirmasi Pemesanan</button>
+    </div>
+  </main>
+
+  <script>
+    let pesanan = JSON.parse(localStorage.getItem("pesananBuku")) || [];
+
+    function tampilkanPesanan() {
+      const tbody = document.getElementById("tabelPesanan");
+      const totalEl = document.getElementById("totalHarga");
+      tbody.innerHTML = "";
+      let total = 0;
+
+      pesanan.forEach((item, i) => {
+        const subtotal = item.harga * item.jumlah;
+        total += subtotal;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${item.nama}</td>
+          <td><input type="number" min="1" value="${item.jumlah}" onchange="ubahJumlah(${i}, this.value)" style="width:60px"></td>
+          <td>Rp ${item.harga.toLocaleString()}</td>
+          <td>Rp ${subtotal.toLocaleString()}</td>
+          <td><button onclick="hapusPesanan(${i})">Hapus</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      totalEl.textContent = "Rp " + total.toLocaleString();
+    }
+
+    function ubahJumlah(i, jumlahBaru) {
+      pesanan[i].jumlah = parseInt(jumlahBaru);
+      localStorage.setItem("pesananBuku", JSON.stringify(pesanan));
+      tampilkanPesanan();
+    }
+
+    function hapusPesanan(i) {
+      pesanan.splice(i, 1);
+      localStorage.setItem("pesananBuku", JSON.stringify(pesanan));
+      tampilkanPesanan();
+    }
+
+    function generateNoDO() {
+      const random = Math.floor(10000 + Math.random() * 90000);
+      return "DO-" + random;
+    }
+
+    function konfirmasiPesanan() {
+      const nama = document.getElementById("nama").value.trim();
+      const alamat = document.getElementById("alamat").value.trim();
+      const pembayaran = document.getElementById("pembayaran").value;
+      const ekspedisi = document.getElementById("ekspedisi").value;
+
+      if (!nama || !alamat || !pembayaran || !ekspedisi) {
+        alert("Harap isi semua data pemesanan!");
+        return;
+      }
+
+      const noDO = generateNoDO();
+      const dataPesanan = {
+        noDO,
+        nama,
+        alamat,
+        pembayaran,
+        ekspedisi,
+        pesanan
+      };
+
+      localStorage.setItem("dataCheckout", JSON.stringify(dataPesanan));
+
+      alert(`✅ Pesanan Berhasil!\n\nNo DO: ${noDO}\nNama: ${nama}\nAlamat: ${alamat}\nPembayaran: ${pembayaran}\nEkspedisi: ${ekspedisi}`);
+      localStorage.removeItem("pesananBuku");
+      window.location.href = "tracking.html";
+    }
+
+    tampilkanPesanan();
+  </script>
+</body>
+</html>
